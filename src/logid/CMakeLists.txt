@@ -21,7 +21,9 @@ add_executable(logid
         Configuration.cpp
         features/DPI.cpp
         features/SmartShift.cpp
+        features/HapticFeedback.cpp
         features/HiresScroll.cpp
+        features/ScrollSmoother.cpp
         features/RemapButton.cpp
         features/DeviceStatus.cpp
         features/ThumbWheel.cpp
@@ -62,6 +64,7 @@ add_executable(logid
         backend/hidpp20/features/AdjustableDPI.cpp
         backend/hidpp20/features/SmartShift.cpp
         backend/hidpp20/features/ReprogControls.cpp
+        backend/hidpp20/features/HapticFeedback.cpp
         backend/hidpp20/features/HiresScroll.cpp
         backend/hidpp20/features/ChangeHost.cpp
         backend/hidpp20/features/WirelessDeviceStatus.cpp

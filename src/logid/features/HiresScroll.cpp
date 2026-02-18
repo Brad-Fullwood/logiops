@@ -39,6 +39,8 @@ HiresScroll::HiresScroll(Device* dev) :
         throw UnsupportedFeature();
     }
 
+    _smoother = std::make_shared<ScrollSmoother>(_node);
+
     _makeConfig();
 
     _last_scroll = std::chrono::system_clock::now();
@@ -96,6 +98,15 @@ void HiresScroll::_configure() {
 
 void HiresScroll::listen() {
     std::shared_lock lock(_config_mutex);
+    _smoother->setOnChunk([w = self<HiresScroll>()](int32_t chunk) {
+        if (auto s = w.lock()) {
+            std::shared_lock lock(s->_config_mutex);
+            if (chunk > 0 && s->_up_gesture)
+                s->_up_gesture->move(chunk);
+            else if (chunk < 0 && s->_down_gesture)
+                s->_down_gesture->move(-chunk);
+        }
+    });
     if (_ev_handler.empty()) {
         _ev_handler = _device->hidpp20().addEventHandler(
                 {[index = _hires_scroll->featureIndex()](
@@ -173,9 +184,8 @@ void HiresScroll::_handleScroll(hidpp20::HiresScroll::WheelStatus event) {
                 _down_gesture->release(false);
                 _down_gesture->press(true);
             }
+            _smoother->reset();
         }
-        if (_up_gesture)
-            _up_gesture->move(event.deltaV);
         _last_direction = 1;
     } else if (event.deltaV < 0) {
         if (_last_direction == 1) {
@@ -183,11 +193,12 @@ void HiresScroll::_handleScroll(hidpp20::HiresScroll::WheelStatus event) {
                 _up_gesture->release(false);
                 _up_gesture->press(true);
             }
+            _smoother->reset();
         }
-        if (_down_gesture)
-            _down_gesture->move((int16_t) -event.deltaV);
         _last_direction = -1;
     }
+
+    _smoother->feed(event.deltaV);
 
     _last_scroll = now;
 }

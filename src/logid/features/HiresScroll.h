@@ -26,6 +26,7 @@
 #include <optional>
 #include <variant>
 #include <chrono>
+#include <features/ScrollSmoother.h>
 
 namespace logid::features {
     class HiresScroll : public DeviceFeature {
@@ -57,6 +58,8 @@ namespace logid::features {
         void _fixGesture(const std::shared_ptr<actions::Gesture>& gesture);
 
         void _handleScroll(backend::hidpp20::HiresScroll::WheelStatus event);
+
+        std::shared_ptr<ScrollSmoother> _smoother;
 
         class IPC : public ipcgull::interface {
         public:
