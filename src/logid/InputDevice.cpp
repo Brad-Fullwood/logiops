@@ -62,6 +62,26 @@ InputDevice::InputDevice(const char* name) {
 
     libevdev_enable_event_type(device, EV_REL);
 
+    // Pre-register scroll axes so the uinput device is never
+    // destroyed and recreated when divert/target modes need them.
+    // Compositors (e.g. niri) may lose track of the device on recreate.
+#ifdef REL_WHEEL
+    registered_axis[REL_WHEEL] = true;
+    libevdev_enable_event_code(device, EV_REL, REL_WHEEL, nullptr);
+#endif
+#ifdef REL_HWHEEL
+    registered_axis[REL_HWHEEL] = true;
+    libevdev_enable_event_code(device, EV_REL, REL_HWHEEL, nullptr);
+#endif
+#ifdef REL_WHEEL_HI_RES
+    registered_axis[REL_WHEEL_HI_RES] = true;
+    libevdev_enable_event_code(device, EV_REL, REL_WHEEL_HI_RES, nullptr);
+#endif
+#ifdef REL_HWHEEL_HI_RES
+    registered_axis[REL_HWHEEL_HI_RES] = true;
+    libevdev_enable_event_code(device, EV_REL, REL_HWHEEL_HI_RES, nullptr);
+#endif
+
     int err = libevdev_uinput_create_from_device(device,
                                                  LIBEVDEV_UINPUT_OPEN_MANAGED, &ui_device);
 

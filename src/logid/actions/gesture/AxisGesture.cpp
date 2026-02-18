@@ -51,8 +51,12 @@ AxisGesture::AxisGesture(Device* device, config::AxisGesture& config,
 
     }
 
-    if (_input_axis.has_value())
+    if (_input_axis.has_value()) {
         _device->virtualInput()->registerAxis(_input_axis.value());
+        int low_res_axis = InputDevice::getLowResAxis(_input_axis.value());
+        if (low_res_axis != -1)
+            _device->virtualInput()->registerAxis(static_cast<uint>(low_res_axis));
+    }
 }
 
 void AxisGesture::press(bool init_threshold) {
@@ -79,7 +83,7 @@ void AxisGesture::move(int16_t axis) {
     const auto threshold = _config.threshold.value_or(
             defaults::gesture_threshold);
     int32_t new_axis = _axis + axis;
-    int low_res_axis = InputDevice::getLowResAxis(axis);
+    int low_res_axis = InputDevice::getLowResAxis(_input_axis.value());
     int hires_remainder = _hires_remainder;
 
     if (new_axis > threshold) {
@@ -138,7 +142,7 @@ void AxisGesture::setHiresMultiplier(double multiplier) {
     _hires_multiplier = multiplier;
     if (_input_axis.has_value()) {
         if (InputDevice::getLowResAxis(_input_axis.value()) != -1)
-            _multiplier = _config.axis_multiplier.value_or(1) * multiplier;
+            _multiplier = multiplier;
     }
 }
 
@@ -165,6 +169,9 @@ void AxisGesture::setAxis(const std::string& axis) {
         _input_axis = _device->virtualInput()->toAxisCode(axis);
         _config.axis = axis;
         _device->virtualInput()->registerAxis(_input_axis.value());
+        int low_res_axis = InputDevice::getLowResAxis(_input_axis.value());
+        if (low_res_axis != -1)
+            _device->virtualInput()->registerAxis(static_cast<uint>(low_res_axis));
     }
     setHiresMultiplier(_hires_multiplier);
 }
