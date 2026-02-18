@@ -4,7 +4,8 @@
 
 <busconfig>
   <policy context="default">
-    <deny receive_sender="pizza.pixl.LogiOps"/>
+    <allow send_destination="pizza.pixl.LogiOps"/>
+    <allow receive_sender="pizza.pixl.LogiOps"/>
   </policy>
 
   <policy user="root">
